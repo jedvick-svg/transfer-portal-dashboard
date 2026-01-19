@@ -137,31 +137,75 @@ def get_custom_css():
         footer {{visibility: hidden;}}
         header {{visibility: hidden;}}
 
-        /* Main content area */
+        /* Main content area - add padding for top nav */
         .main .block-container {{
-            padding: 2rem 3rem;
+            padding: 1rem 3rem 2rem 3rem;
             max-width: 1400px;
         }}
 
-        /* Custom header */
-        .main-header {{
-            font-size: 2.25rem;
-            font-weight: 800;
-            color: {COLORS['text_primary']};
-            margin-bottom: 0.25rem;
-            letter-spacing: -0.03em;
-            line-height: 1.2;
+        /* ========== TOP NAVIGATION BAR ========== */
+        .top-nav {{
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 56px;
+            background: {COLORS['bg_primary']};
+            border-bottom: 1px solid {COLORS['border']};
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            z-index: 1000;
+            box-shadow: {COLORS['shadow_sm']};
         }}
 
-        .sub-header {{
-            color: {COLORS['text_secondary']};
+        .top-nav-brand {{
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 700;
             font-size: 1.125rem;
-            font-weight: 400;
-            margin-bottom: 2rem;
-            line-height: 1.5;
+            color: {COLORS['text_primary']};
         }}
 
-        /* Metric cards - SaaS style with colored left border */
+        .top-nav-links {{
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }}
+
+        .top-nav-link {{
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: {COLORS['text_secondary']};
+            text-decoration: none;
+            transition: all var(--transition-fast);
+        }}
+
+        .top-nav-link:hover {{
+            background: {COLORS['bg_secondary']};
+            color: {COLORS['text_primary']};
+        }}
+
+        .top-nav-link.active {{
+            background: {COLORS['accent_primary']}15;
+            color: {COLORS['accent_primary']};
+        }}
+
+        /* Spacer for fixed top nav */
+        .nav-spacer {{
+            height: 56px;
+        }}
+
+        /* ========== CLICKABLE STAT CARDS ========== */
+        .metric-card-link {{
+            text-decoration: none;
+            display: block;
+        }}
+
         .metric-card {{
             background: {COLORS['bg_card']};
             border: 1px solid {COLORS['border']};
@@ -170,23 +214,34 @@ def get_custom_css():
             padding: 1.25rem 1.5rem;
             box-shadow: {COLORS['shadow_sm']};
             transition: all var(--transition-normal);
+            cursor: pointer;
         }}
 
         .metric-card:hover {{
             box-shadow: {COLORS['shadow_md']};
-            transform: translateY(-2px);
+            transform: translateY(-3px);
+            border-color: {COLORS['accent_primary']};
         }}
 
         .metric-card.success {{
             border-left-color: {COLORS['accent_success']};
         }}
+        .metric-card.success:hover {{
+            border-color: {COLORS['accent_success']};
+        }}
 
         .metric-card.warning {{
             border-left-color: {COLORS['accent_warning']};
         }}
+        .metric-card.warning:hover {{
+            border-color: {COLORS['accent_warning']};
+        }}
 
         .metric-card.info {{
             border-left-color: {COLORS['accent_info']};
+        }}
+        .metric-card.info:hover {{
+            border-color: {COLORS['accent_info']};
         }}
 
         .metric-value {{
@@ -206,7 +261,30 @@ def get_custom_css():
             margin-top: 0.375rem;
         }}
 
-        /* Team cards - clean list style */
+        /* Custom header */
+        .main-header {{
+            font-size: 2.25rem;
+            font-weight: 800;
+            color: {COLORS['text_primary']};
+            margin-bottom: 0.25rem;
+            letter-spacing: -0.03em;
+            line-height: 1.2;
+        }}
+
+        .sub-header {{
+            color: {COLORS['text_secondary']};
+            font-size: 1.125rem;
+            font-weight: 400;
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+        }}
+
+        /* ========== CLICKABLE TEAM CARDS ========== */
+        .team-card-link {{
+            text-decoration: none;
+            display: block;
+        }}
+
         .team-card {{
             background: {COLORS['bg_card']};
             border: 1px solid {COLORS['border']};
@@ -223,7 +301,8 @@ def get_custom_css():
         .team-card:hover {{
             background: {COLORS['bg_card_hover']};
             border-color: {COLORS['accent_primary']};
-            box-shadow: {COLORS['shadow_sm']};
+            box-shadow: {COLORS['shadow_md']};
+            transform: translateX(4px);
         }}
 
         .team-logo {{
@@ -286,7 +365,98 @@ def get_custom_css():
             color: {COLORS['accent_danger']};
         }}
 
-        /* Player rows */
+        /* ========== SIDEBAR IMPROVEMENTS ========== */
+        [data-testid="stSidebar"] {{
+            background: {COLORS['bg_sidebar']};
+            border-right: 1px solid {COLORS['border']};
+            transition: all 0.3s ease;
+        }}
+
+        [data-testid="stSidebar"] > div:first-child {{
+            padding: 1.5rem 1.25rem;
+        }}
+
+        /* Sidebar collapse button styling */
+        [data-testid="stSidebar"] [data-testid="collapsedControl"] {{
+            background: {COLORS['bg_card']};
+            border: 1px solid {COLORS['border']};
+            border-radius: var(--radius-sm);
+            color: {COLORS['text_secondary']};
+        }}
+
+        [data-testid="stSidebar"] .stSelectbox label,
+        [data-testid="stSidebar"] .stRadio label {{
+            color: {COLORS['text_secondary']};
+            font-weight: 500;
+            font-size: 0.8125rem;
+        }}
+
+        /* ========== BACK BUTTON ========== */
+        .back-button {{
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: {COLORS['bg_card']};
+            border: 1px solid {COLORS['border']};
+            border-radius: var(--radius-sm);
+            color: {COLORS['text_secondary']};
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all var(--transition-fast);
+            cursor: pointer;
+            margin-bottom: 1.5rem;
+        }}
+
+        .back-button:hover {{
+            background: {COLORS['bg_secondary']};
+            color: {COLORS['text_primary']};
+            border-color: {COLORS['accent_primary']};
+        }}
+
+        /* ========== DATA TABLE STYLES ========== */
+        .data-table-container {{
+            background: {COLORS['bg_card']};
+            border: 1px solid {COLORS['border']};
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: {COLORS['shadow_sm']};
+        }}
+
+        .data-table {{
+            width: 100%;
+            border-collapse: collapse;
+        }}
+
+        .data-table th {{
+            background: {COLORS['bg_secondary']};
+            padding: 0.875rem 1rem;
+            text-align: left;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: {COLORS['text_muted']};
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid {COLORS['border']};
+        }}
+
+        .data-table td {{
+            padding: 0.875rem 1rem;
+            font-size: 0.875rem;
+            color: {COLORS['text_primary']};
+            border-bottom: 1px solid {COLORS['border_light']};
+        }}
+
+        .data-table tr:hover td {{
+            background: {COLORS['bg_card_hover']};
+        }}
+
+        .data-table tr:last-child td {{
+            border-bottom: none;
+        }}
+
+        /* ========== PLAYER ROWS ========== */
         .player-row {{
             background: {COLORS['bg_card']};
             border: 1px solid {COLORS['border']};
@@ -350,7 +520,45 @@ def get_custom_css():
             letter-spacing: 0.03em;
         }}
 
-        /* News feed items */
+        /* ========== SECTION HEADERS ========== */
+        .section-header {{
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: {COLORS['text_primary']};
+            margin: 1.5rem 0 1rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }}
+
+        /* ========== FILTER BAR ========== */
+        .filter-bar {{
+            display: flex;
+            gap: 1rem;
+            padding: 1rem;
+            background: {COLORS['bg_card']};
+            border: 1px solid {COLORS['border']};
+            border-radius: var(--radius-md);
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }}
+
+        .filter-item {{
+            flex: 1;
+            min-width: 150px;
+        }}
+
+        .filter-label {{
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: {COLORS['text_muted']};
+            margin-bottom: 0.375rem;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }}
+
+        /* ========== NEWS ITEMS ========== */
         .news-item {{
             background: {COLORS['bg_card']};
             border: 1px solid {COLORS['border']};
@@ -387,35 +595,7 @@ def get_custom_css():
             color: {COLORS['text_muted']};
         }}
 
-        /* Sidebar styling */
-        [data-testid="stSidebar"] {{
-            background: {COLORS['bg_sidebar']};
-            border-right: 1px solid {COLORS['border']};
-        }}
-
-        [data-testid="stSidebar"] > div:first-child {{
-            padding: 2rem 1.5rem;
-        }}
-
-        [data-testid="stSidebar"] .stSelectbox label,
-        [data-testid="stSidebar"] .stRadio label {{
-            color: {COLORS['text_secondary']};
-            font-weight: 500;
-            font-size: 0.8125rem;
-        }}
-
-        /* Section headers */
-        .section-header {{
-            font-size: 1.125rem;
-            font-weight: 600;
-            color: {COLORS['text_primary']};
-            margin: 1.5rem 0 1rem 0;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }}
-
-        /* Card containers */
+        /* ========== CARD CONTAINERS ========== */
         .card-container {{
             background: {COLORS['bg_card']};
             border: 1px solid {COLORS['border']};
@@ -424,7 +604,29 @@ def get_custom_css():
             box-shadow: {COLORS['shadow_sm']};
         }}
 
-        /* DataFrames */
+        /* ========== METHODOLOGY ========== */
+        .methodology-card {{
+            background: {COLORS['bg_card']};
+            border: 1px solid {COLORS['border']};
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: {COLORS['shadow_sm']};
+        }}
+
+        .formula-box {{
+            background: {COLORS['bg_secondary']};
+            border: 1px solid {COLORS['border']};
+            border-left: 3px solid {COLORS['accent_primary']};
+            border-radius: var(--radius-sm);
+            padding: 1.25rem;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            color: {COLORS['text_primary']};
+            font-size: 0.875rem;
+            margin: 1rem 0;
+        }}
+
+        /* ========== MISC ========== */
         .stDataFrame {{
             background: {COLORS['bg_card']};
             border-radius: var(--radius-md);
@@ -432,7 +634,6 @@ def get_custom_css():
             border: 1px solid {COLORS['border']};
         }}
 
-        /* Buttons */
         .stButton > button {{
             background: {COLORS['accent_primary']};
             color: white;
@@ -449,7 +650,6 @@ def get_custom_css():
             box-shadow: {COLORS['shadow_sm']};
         }}
 
-        /* Tabs */
         .stTabs [data-baseweb="tab-list"] {{
             background: {COLORS['bg_card']};
             border-radius: var(--radius-md);
@@ -472,20 +672,12 @@ def get_custom_css():
             color: white;
         }}
 
-        /* Charts */
-        .js-plotly-plot {{
-            border-radius: var(--radius-md);
-            overflow: hidden;
-        }}
-
-        /* Dividers */
         hr {{
             border: none;
             border-top: 1px solid {COLORS['divider']};
             margin: 1.5rem 0;
         }}
 
-        /* Links */
         a {{
             color: {COLORS['accent_primary']};
             text-decoration: none;
@@ -496,7 +688,6 @@ def get_custom_css():
             color: {COLORS['accent_secondary']};
         }}
 
-        /* Value indicators */
         .value-positive {{
             color: {COLORS['accent_success']};
         }}
@@ -505,29 +696,7 @@ def get_custom_css():
             color: {COLORS['accent_danger']};
         }}
 
-        /* Methodology section */
-        .methodology-card {{
-            background: {COLORS['bg_card']};
-            border: 1px solid {COLORS['border']};
-            border-radius: var(--radius-lg);
-            padding: 2rem;
-            margin-bottom: 1.5rem;
-            box-shadow: {COLORS['shadow_sm']};
-        }}
-
-        .formula-box {{
-            background: {COLORS['bg_secondary']};
-            border: 1px solid {COLORS['border']};
-            border-left: 3px solid {COLORS['accent_primary']};
-            border-radius: var(--radius-sm);
-            padding: 1.25rem;
-            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
-            color: {COLORS['text_primary']};
-            font-size: 0.875rem;
-            margin: 1rem 0;
-        }}
-
-        /* Scrollbar - subtle */
+        /* Scrollbar */
         ::-webkit-scrollbar {{
             width: 6px;
             height: 6px;
@@ -546,14 +715,12 @@ def get_custom_css():
             background: {COLORS['text_muted']};
         }}
 
-        /* Select boxes */
         .stSelectbox > div > div {{
             background: {COLORS['bg_card']};
             border-color: {COLORS['border']};
             border-radius: var(--radius-sm);
         }}
 
-        /* Input fields */
         .stTextInput > div > div > input {{
             background: {COLORS['bg_card']};
             border-color: {COLORS['border']};
@@ -561,49 +728,6 @@ def get_custom_css():
             color: {COLORS['text_primary']};
         }}
 
-        /* Expanders */
-        .streamlit-expanderHeader {{
-            background: {COLORS['bg_card']};
-            border-radius: var(--radius-sm);
-            font-weight: 500;
-        }}
-
-        /* Page navigation in sidebar */
-        [data-testid="stSidebar"] a {{
-            display: block;
-            padding: 0.625rem 0.875rem;
-            border-radius: var(--radius-sm);
-            color: {COLORS['text_secondary']};
-            font-weight: 500;
-            font-size: 0.875rem;
-            transition: all var(--transition-fast);
-            margin-bottom: 0.25rem;
-        }}
-
-        [data-testid="stSidebar"] a:hover {{
-            background: {COLORS['bg_card']};
-            color: {COLORS['text_primary']};
-        }}
-
-        /* Stat badges */
-        .stat-badge {{
-            display: inline-flex;
-            align-items: center;
-            gap: 0.375rem;
-            background: {COLORS['bg_secondary']};
-            padding: 0.375rem 0.75rem;
-            border-radius: var(--radius-full);
-            font-size: 0.75rem;
-            font-weight: 500;
-            color: {COLORS['text_secondary']};
-        }}
-
-        .stat-badge.primary {{
-            background: {COLORS['accent_primary']}15;
-            color: {COLORS['accent_primary']};
-        }}
-
-        /* Empty state */
         .empty-state {{
             text-align: center;
             padding: 3rem 2rem;
@@ -615,7 +739,86 @@ def get_custom_css():
             margin-bottom: 1rem;
             opacity: 0.5;
         }}
+
+        /* Loading spinner */
+        .loading-spinner {{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 3rem;
+        }}
+
+        /* Pagination */
+        .pagination {{
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+        }}
+
+        .pagination-btn {{
+            padding: 0.5rem 1rem;
+            background: {COLORS['bg_card']};
+            border: 1px solid {COLORS['border']};
+            border-radius: var(--radius-sm);
+            color: {COLORS['text_secondary']};
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }}
+
+        .pagination-btn:hover {{
+            background: {COLORS['bg_secondary']};
+            border-color: {COLORS['accent_primary']};
+        }}
+
+        .pagination-btn.active {{
+            background: {COLORS['accent_primary']};
+            color: white;
+            border-color: {COLORS['accent_primary']};
+        }}
     </style>
+    """
+
+
+def render_top_nav(active_page="home"):
+    """Render the top navigation bar."""
+    nav_items = [
+        {"id": "home", "label": "Home", "url": "/"},
+        {"id": "database", "label": "Database", "url": "/Database"},
+        {"id": "teams", "label": "Teams", "url": "/Team_Details"},
+        {"id": "about", "label": "About", "url": "/About"},
+    ]
+
+    links_html = ""
+    for item in nav_items:
+        active_class = "active" if item["id"] == active_page else ""
+        links_html += f'<a href="{item["url"]}" class="top-nav-link {active_class}">{item["label"]}</a>'
+
+    return f"""
+    <div class="top-nav">
+        <div class="top-nav-brand">
+            <span>🏈</span>
+            <span>Transfer Portal</span>
+        </div>
+        <div class="top-nav-links">
+            {links_html}
+        </div>
+    </div>
+    <div class="nav-spacer"></div>
+    """
+
+
+def render_metric_card_clickable(value, label, variant="default", link="/Database"):
+    """Render a clickable styled metric card."""
+    variant_class = f" {variant}" if variant != "default" else ""
+    return f"""
+    <a href="{link}" class="metric-card-link">
+        <div class="metric-card{variant_class}">
+            <p class="metric-value">{value}</p>
+            <p class="metric-label">{label}</p>
+        </div>
+    </a>
     """
 
 
@@ -630,8 +833,33 @@ def render_metric_card(value, label, variant="default", icon=""):
     """
 
 
+def render_team_card_clickable(rank, team, conference, value, net_value, logo_url=""):
+    """Render a clickable styled team card with logo."""
+    net_class = "positive" if net_value >= 0 else "negative"
+    net_prefix = "+" if net_value >= 0 else ""
+    logo_html = f'<img src="{logo_url}" class="team-logo" alt="{team}" />' if logo_url else ""
+    team_url = team.replace(" ", "_")
+
+    return f"""
+    <a href="/Team_Details?team={team_url}" class="team-card-link">
+        <div class="team-card">
+            <span class="team-rank">{rank}</span>
+            {logo_html}
+            <div class="team-info">
+                <div class="team-name">{team}</div>
+                <div class="team-conference">{conference}</div>
+            </div>
+            <div class="team-stats">
+                <div class="team-value">${value:.1f}M</div>
+                <div class="team-net {net_class}">{net_prefix}${net_value:.1f}M</div>
+            </div>
+        </div>
+    </a>
+    """
+
+
 def render_team_card(rank, team, conference, value, net_value, logo_url=""):
-    """Render a styled team card with logo."""
+    """Render a styled team card with logo (non-clickable version)."""
     net_class = "positive" if net_value >= 0 else "negative"
     net_prefix = "+" if net_value >= 0 else ""
     logo_html = f'<img src="{logo_url}" class="team-logo" alt="{team}" />' if logo_url else ""
@@ -649,6 +877,15 @@ def render_team_card(rank, team, conference, value, net_value, logo_url=""):
             <div class="team-net {net_class}">{net_prefix}${net_value:.1f}M</div>
         </div>
     </div>
+    """
+
+
+def render_back_button(url="/", label="Back to Dashboard"):
+    """Render a back button."""
+    return f"""
+    <a href="{url}" class="back-button">
+        ← {label}
+    </a>
     """
 
 

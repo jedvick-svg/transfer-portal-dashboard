@@ -6,13 +6,15 @@ Inspired by Linear, Vercel, and Stripe's dashboard aesthetic.
 """
 
 import streamlit as st
-import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
 # Import our modules
-from src.theme import get_custom_css, COLORS, render_metric_card, render_team_card, get_team_logo, TEAM_LOGOS
-from src.data import get_team_data, get_summary_stats, get_team_conference
+from src.theme import (
+    get_custom_css, COLORS, render_top_nav, render_metric_card_clickable,
+    render_team_card_clickable, get_team_logo
+)
+from src.data import get_team_data, get_summary_stats
 
 # Page configuration
 st.set_page_config(
@@ -25,9 +27,8 @@ st.set_page_config(
 # Apply custom CSS
 st.markdown(get_custom_css(), unsafe_allow_html=True)
 
-# Header
-st.markdown('<h1 class="main-header">Transfer Portal Dashboard</h1>', unsafe_allow_html=True)
-st.markdown('<p class="sub-header">Track college football transfer portal activity with real-time rankings and analysis</p>', unsafe_allow_html=True)
+# Top navigation bar
+st.markdown(render_top_nav(active_page="home"), unsafe_allow_html=True)
 
 # Get data
 stats = get_summary_stats()
@@ -60,19 +61,6 @@ with st.sidebar:
 
     st.markdown("---")
 
-    # Quick links with modern styling
-    st.markdown(f"""
-        <div style="margin-bottom: 1rem;">
-            <p style="font-size: 0.75rem; font-weight: 600; color: {COLORS['text_muted']}; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem;">Navigation</p>
-        </div>
-    """, unsafe_allow_html=True)
-
-    st.page_link("pages/1_Team_Details.py", label="Team Details", icon="📋")
-    st.page_link("pages/2_Methodology.py", label="Valuation Methodology", icon="📊")
-    st.page_link("pages/3_Live_Feed.py", label="Live News Feed", icon="📰")
-
-    st.markdown("---")
-
     st.markdown(
         f"""
         <div style="color: {COLORS['text_muted']}; font-size: 0.6875rem; line-height: 1.5;">
@@ -83,29 +71,31 @@ with st.sidebar:
         unsafe_allow_html=True
     )
 
-# Metrics row with spacing
-st.markdown("<div style='height: 0.5rem;'></div>", unsafe_allow_html=True)
+# Header
+st.markdown('<h1 class="main-header">Transfer Portal Dashboard</h1>', unsafe_allow_html=True)
+st.markdown('<p class="sub-header">Track college football transfer portal activity with real-time rankings and analysis</p>', unsafe_allow_html=True)
 
+# Clickable metrics row
 col1, col2, col3, col4 = st.columns(4, gap="medium")
 
 with col1:
     st.markdown(
-        render_metric_card(f"{stats['total_transfers']:,}", "Total Transfers", "default"),
+        render_metric_card_clickable(f"{stats['total_transfers']:,}", "Total Transfers", "default", "/Database"),
         unsafe_allow_html=True
     )
 with col2:
     st.markdown(
-        render_metric_card(f"${stats['total_value']}M", "Total Value", "success"),
+        render_metric_card_clickable(f"${stats['total_value']}M", "Total Value", "success", "/Database"),
         unsafe_allow_html=True
     )
 with col3:
     st.markdown(
-        render_metric_card(f"{stats['avg_rating']}", "Avg Rating", "warning"),
+        render_metric_card_clickable(f"{stats['avg_rating']}", "Avg Rating", "warning", "/Database"),
         unsafe_allow_html=True
     )
 with col4:
     st.markdown(
-        render_metric_card(f"{stats['teams_tracked']}", "Teams Tracked", "info"),
+        render_metric_card_clickable(f"{stats['teams_tracked']}", "Teams Tracked", "info", "/Database"),
         unsafe_allow_html=True
     )
 
@@ -126,12 +116,13 @@ col_left, col_right = st.columns([3, 2], gap="large")
 
 with col_left:
     st.markdown('<div class="section-header">Top 25 Team Rankings</div>', unsafe_allow_html=True)
+    st.markdown(f'<p style="color: {COLORS["text_muted"]}; font-size: 0.8125rem; margin-bottom: 1rem;">Click any team to view detailed transfer activity</p>', unsafe_allow_html=True)
 
-    # Create team list with logos
+    # Create clickable team list with logos
     for _, row in filtered_df.iterrows():
         logo_url = get_team_logo(row['team'])
         st.markdown(
-            render_team_card(
+            render_team_card_clickable(
                 rank=row['rank'],
                 team=row['team'],
                 conference=row['conference'],

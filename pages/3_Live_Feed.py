@@ -6,7 +6,7 @@ Real-time news feed for transfer portal updates from various sources.
 
 import streamlit as st
 
-from src.theme import get_custom_css, COLORS
+from src.theme import get_custom_css, COLORS, render_top_nav
 from src.news_feed import get_latest_news, get_news_categories, SOURCE_COLORS
 
 # Page configuration
@@ -18,6 +18,9 @@ st.set_page_config(
 
 # Apply custom CSS
 st.markdown(get_custom_css(), unsafe_allow_html=True)
+
+# Top navigation bar
+st.markdown(render_top_nav(active_page="home"), unsafe_allow_html=True)
 
 # Additional CSS for news feed
 st.markdown(

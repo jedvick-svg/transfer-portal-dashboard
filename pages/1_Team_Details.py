@@ -9,7 +9,7 @@ import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 
-from src.theme import get_custom_css, COLORS, TEAM_COLORS, get_team_logo
+from src.theme import get_custom_css, COLORS, TEAM_COLORS, get_team_logo, render_top_nav, render_back_button
 from src.data import get_all_teams_list, get_team_details, get_team_conference
 
 # Page configuration
@@ -22,9 +22,15 @@ st.set_page_config(
 # Apply custom CSS
 st.markdown(get_custom_css(), unsafe_allow_html=True)
 
+# Top navigation bar
+st.markdown(render_top_nav(active_page="teams"), unsafe_allow_html=True)
+
 # Get query params for direct linking
 params = st.query_params
 default_team = params.get("team", "Georgia")
+# Handle URL-encoded team names (replace underscores with spaces)
+if default_team:
+    default_team = default_team.replace("_", " ")
 
 # Sidebar - Team selector
 with st.sidebar:
@@ -45,15 +51,18 @@ with st.sidebar:
 
     st.markdown("---")
 
-    st.markdown(f"""
-        <div style="margin-bottom: 1rem;">
-            <p style="font-size: 0.75rem; font-weight: 600; color: {COLORS['text_muted']}; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem;">Navigation</p>
+    st.markdown(
+        f"""
+        <div style="color: {COLORS['text_muted']}; font-size: 0.6875rem; line-height: 1.5;">
+            <p style="margin-bottom: 0.25rem;">Last updated: Jan 18, 2026</p>
+            <p>Data: 247Sports, ESPN, On3</p>
         </div>
-    """, unsafe_allow_html=True)
+        """,
+        unsafe_allow_html=True
+    )
 
-    st.page_link("app.py", label="Back to Rankings", icon="🏠")
-    st.page_link("pages/2_Methodology.py", label="Methodology", icon="📊")
-    st.page_link("pages/3_Live_Feed.py", label="Live Feed", icon="📰")
+# Back button
+st.markdown(render_back_button("/", "Back to Dashboard"), unsafe_allow_html=True)
 
 # Get team data
 team_data = get_team_details(selected_team)
@@ -76,16 +85,16 @@ st.markdown(
     f"""
     <div style="display: flex; align-items: center; gap: 1.25rem; margin-bottom: 2rem;">
         <div style="
-            width: 72px;
-            height: 72px;
+            width: 80px;
+            height: 80px;
             background: {COLORS['bg_card']};
             border: 1px solid {COLORS['border']};
-            border-radius: 12px;
+            border-radius: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 8px;
-            box-shadow: {COLORS['shadow_sm']};
+            padding: 10px;
+            box-shadow: {COLORS['shadow_md']};
         ">
             <img src="{logo_url}" style="width: 100%; height: 100%; object-fit: contain;" alt="{selected_team}" />
         </div>
@@ -361,7 +370,7 @@ st.markdown(
     f"""
     <div style="text-align: center; padding: 1.5rem 0; border-top: 1px solid {COLORS['border']};">
         <p style="color: {COLORS['text_muted']}; font-size: 0.8125rem; margin-bottom: 0.5rem;">Want to understand how player values are calculated?</p>
-        <a href="/Methodology" style="color: {COLORS['accent_primary']}; font-weight: 500;">View our valuation methodology →</a>
+        <a href="/About" style="color: {COLORS['accent_primary']}; font-weight: 500;">View our valuation methodology →</a>
     </div>
     """,
     unsafe_allow_html=True

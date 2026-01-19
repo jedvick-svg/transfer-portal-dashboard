@@ -7,7 +7,7 @@ Explains the player valuation methodology used in the dashboard.
 import streamlit as st
 import plotly.graph_objects as go
 
-from src.theme import get_custom_css, COLORS
+from src.theme import get_custom_css, COLORS, render_top_nav
 from src.valuation import get_methodology_text, POSITION_MULTIPLIERS
 
 # Page configuration
@@ -19,6 +19,9 @@ st.set_page_config(
 
 # Apply custom CSS
 st.markdown(get_custom_css(), unsafe_allow_html=True)
+
+# Top navigation bar
+st.markdown(render_top_nav(active_page="about"), unsafe_allow_html=True)
 
 # Sidebar
 with st.sidebar:
