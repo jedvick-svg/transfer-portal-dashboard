@@ -3,6 +3,8 @@ Transfer Portal Dashboard - Main Application
 
 A modern, polished dashboard for tracking college football transfer portal activity.
 Inspired by Linear, Vercel, and Stripe's dashboard aesthetic.
+
+Version: 1.1.0
 """
 
 import streamlit as st
