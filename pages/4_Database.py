@@ -1,5 +1,5 @@
 """
-Database Page
+Database Page - NIL or Nothing
 
 Comprehensive database of all transfer portal movements with filtering, sorting, and search.
 """
@@ -7,12 +7,12 @@ Comprehensive database of all transfer portal movements with filtering, sorting,
 import streamlit as st
 import pandas as pd
 
-from src.theme import get_custom_css, COLORS, render_top_nav, render_back_button
-from src.data import get_team_data, get_all_teams_list, get_team_details, CONFERENCES
+from src.theme import get_custom_css, COLORS, render_brand_header, render_sample_data_banner
+from src.data import get_all_transfers, get_all_teams_list, CONFERENCES, ALL_POSITIONS
 
 # Page configuration
 st.set_page_config(
-    page_title="Database | Transfer Portal",
+    page_title="Database | NIL or Nothing",
     page_icon="🏈",
     layout="wide"
 )
@@ -20,66 +20,43 @@ st.set_page_config(
 # Apply custom CSS
 st.markdown(get_custom_css(), unsafe_allow_html=True)
 
-# Top navigation bar
-st.markdown(render_top_nav(active_page="database"), unsafe_allow_html=True)
+# Brand header
+st.markdown(render_brand_header(), unsafe_allow_html=True)
 
 
 @st.cache_data
-def get_all_transfers():
-    """Get all transfer data from all teams."""
-    all_transfers = []
-    teams = get_all_teams_list()
+def load_transfer_data():
+    """Load and cache transfer data."""
+    return get_all_transfers()
 
-    for team in teams:
-        team_data = get_team_details(team)
-        if team_data:
-            # Add inflows
-            for player in team_data["inflows"]:
-                all_transfers.append({
-                    "Player": player["name"],
-                    "Position": player["position"],
-                    "From": player.get("previous_team", "Unknown"),
-                    "To": team,
-                    "Rating": player["hs_rating"],
-                    "Value ($M)": player["value"],
-                    "Games": player["games_played"],
-                    "Date": player.get("transfer_date", "Jan 2026"),
-                    "Type": "Inflow",
-                    "Conference": team_data["conference"]
-                })
-
-            # Add outflows
-            for player in team_data["outflows"]:
-                all_transfers.append({
-                    "Player": player["name"],
-                    "Position": player["position"],
-                    "From": team,
-                    "To": player.get("new_team", "TBD"),
-                    "Rating": player["hs_rating"],
-                    "Value ($M)": player["value"],
-                    "Games": player["games_played"],
-                    "Date": player.get("transfer_date", "Jan 2026"),
-                    "Type": "Outflow",
-                    "Conference": team_data["conference"]
-                })
-
-    return pd.DataFrame(all_transfers)
-
-
-# Header
-st.markdown('<h1 class="main-header">Transfer Database</h1>', unsafe_allow_html=True)
-st.markdown('<p class="sub-header">Complete database of all transfer portal movements</p>', unsafe_allow_html=True)
 
 # Get all transfers
 with st.spinner("Loading transfer data..."):
-    df = get_all_transfers()
+    df = load_transfer_data()
 
-# Sidebar filters
+# Navigation
 with st.sidebar:
     st.markdown(f"""
         <div style="margin-bottom: 1.5rem;">
-            <h3 style="font-size: 0.875rem; font-weight: 600; color: {COLORS['text_primary']}; margin-bottom: 0.25rem;">Filters</h3>
-            <p style="font-size: 0.75rem; color: {COLORS['text_muted']};">Narrow down results</p>
+            <div style="font-family: 'Playfair Display', serif; font-size: 1.25rem; font-weight: 800; color: {COLORS['text_primary']}; text-transform: uppercase;">
+                NIL <span style="color: {COLORS['accent_primary']};">or</span> Nothing
+            </div>
+            <p style="font-size: 0.75rem; color: {COLORS['text_muted']}; margin-top: 0.25rem;">2026 Transfer Portal</p>
+        </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("### Navigation")
+    st.page_link("app.py", label="🏠 Home", icon=None)
+    st.page_link("pages/1_Team_Details.py", label="📋 Teams", icon=None)
+    st.page_link("pages/4_Database.py", label="📊 Database", icon=None)
+    st.page_link("pages/3_Live_Feed.py", label="📰 News", icon=None)
+    st.page_link("pages/5_About.py", label="ℹ️ About", icon=None)
+
+    st.markdown("---")
+
+    st.markdown(f"""
+        <div style="margin-bottom: 1rem;">
+            <p style="font-size: 0.75rem; font-weight: 600; color: {COLORS['text_muted']}; text-transform: uppercase; letter-spacing: 0.05em;">Filters</p>
         </div>
     """, unsafe_allow_html=True)
 
@@ -93,15 +70,19 @@ with st.sidebar:
     selected_conference = st.selectbox("Conference", all_conferences)
 
     # Position filter
-    all_positions = ["All Positions"] + sorted(df["Position"].unique().tolist())
+    all_positions = ["All Positions"] + sorted(list(set(ALL_POSITIONS)))
     selected_position = st.selectbox("Position", all_positions)
 
+    # Team filter
+    all_teams = ["All Teams"] + sorted(get_all_teams_list())
+    selected_team = st.selectbox("Team (From/To)", all_teams)
+
     # Transfer type
-    transfer_type = st.selectbox("Transfer Type", ["All", "Inflows", "Outflows"])
+    transfer_type = st.selectbox("Transfer Type", ["All", "Incoming", "Outgoing"])
 
     st.markdown("---")
 
-    # Rating range
+    # Rating range (convert to star ratings)
     st.markdown(f'<p style="font-size: 0.75rem; font-weight: 500; color: {COLORS["text_muted"]}; margin-bottom: 0.5rem;">Rating Range</p>', unsafe_allow_html=True)
     min_rating, max_rating = st.slider(
         "Rating",
@@ -113,17 +94,11 @@ with st.sidebar:
         label_visibility="collapsed"
     )
 
-    # Value range
-    st.markdown(f'<p style="font-size: 0.75rem; font-weight: 500; color: {COLORS["text_muted"]}; margin-bottom: 0.5rem; margin-top: 1rem;">Value Range ($M)</p>', unsafe_allow_html=True)
-    min_value, max_value = st.slider(
-        "Value",
-        min_value=0.0,
-        max_value=float(df["Value ($M)"].max()) + 0.5,
-        value=(0.0, float(df["Value ($M)"].max()) + 0.5),
-        step=0.1,
-        format="%.1f",
-        label_visibility="collapsed"
-    )
+    # Class filter
+    st.markdown(f'<p style="font-size: 0.75rem; font-weight: 500; color: {COLORS["text_muted"]}; margin-bottom: 0.5rem; margin-top: 1rem;">Player Class</p>', unsafe_allow_html=True)
+    class_options = ["All Classes", "Freshman", "Redshirt Freshman", "Sophomore", "Redshirt Sophomore",
+                    "Junior", "Redshirt Junior", "Senior", "Redshirt Senior", "Graduate"]
+    selected_class = st.selectbox("Class", class_options, label_visibility="collapsed")
 
     st.markdown("---")
 
@@ -131,16 +106,23 @@ with st.sidebar:
     if st.button("Reset Filters", use_container_width=True):
         st.rerun()
 
+# Header
+st.markdown('<h1 class="main-header">Transfer Database</h1>', unsafe_allow_html=True)
+st.markdown('<p class="sub-header">Complete database of all transfer portal movements</p>', unsafe_allow_html=True)
+
+# Sample data notice
+st.markdown(render_sample_data_banner(), unsafe_allow_html=True)
+
 # Apply filters
 filtered_df = df.copy()
 
 if search_query:
     search_lower = search_query.lower()
     filtered_df = filtered_df[
-        filtered_df["Player"].str.lower().str.contains(search_lower) |
-        filtered_df["From"].str.lower().str.contains(search_lower) |
-        filtered_df["To"].str.lower().str.contains(search_lower) |
-        filtered_df["Position"].str.lower().str.contains(search_lower)
+        filtered_df["Player"].str.lower().str.contains(search_lower, na=False) |
+        filtered_df["From"].str.lower().str.contains(search_lower, na=False) |
+        filtered_df["To"].str.lower().str.contains(search_lower, na=False) |
+        filtered_df["Position"].str.lower().str.contains(search_lower, na=False)
     ]
 
 if selected_conference != "All Conferences":
@@ -149,16 +131,23 @@ if selected_conference != "All Conferences":
 if selected_position != "All Positions":
     filtered_df = filtered_df[filtered_df["Position"] == selected_position]
 
-if transfer_type == "Inflows":
+if selected_team != "All Teams":
+    filtered_df = filtered_df[
+        (filtered_df["From"] == selected_team) |
+        (filtered_df["To"] == selected_team)
+    ]
+
+if transfer_type == "Incoming":
     filtered_df = filtered_df[filtered_df["Type"] == "Inflow"]
-elif transfer_type == "Outflows":
+elif transfer_type == "Outgoing":
     filtered_df = filtered_df[filtered_df["Type"] == "Outflow"]
+
+if selected_class != "All Classes":
+    filtered_df = filtered_df[filtered_df["Class"] == selected_class]
 
 filtered_df = filtered_df[
     (filtered_df["Rating"] >= min_rating) &
-    (filtered_df["Rating"] <= max_rating) &
-    (filtered_df["Value ($M)"] >= min_value) &
-    (filtered_df["Value ($M)"] <= max_value)
+    (filtered_df["Rating"] <= max_rating)
 ]
 
 # Stats summary
@@ -182,52 +171,59 @@ with col2:
     """, unsafe_allow_html=True)
 
 with col3:
-    avg_rating = filtered_df["Rating"].mean() if len(filtered_df) > 0 else 0
+    avg_score = filtered_df["Score"].mean() if len(filtered_df) > 0 else 0
     st.markdown(f"""
         <div class="metric-card warning">
+            <p class="metric-value">{avg_score:.1f}</p>
+            <p class="metric-label">Avg Score</p>
+        </div>
+    """, unsafe_allow_html=True)
+
+with col4:
+    avg_rating = filtered_df["Rating"].mean() if len(filtered_df) > 0 else 0
+    st.markdown(f"""
+        <div class="metric-card info">
             <p class="metric-value">{avg_rating:.4f}</p>
             <p class="metric-label">Avg Rating</p>
         </div>
     """, unsafe_allow_html=True)
 
-with col4:
-    avg_value = filtered_df["Value ($M)"].mean() if len(filtered_df) > 0 else 0
-    st.markdown(f"""
-        <div class="metric-card info">
-            <p class="metric-value">${avg_value:.2f}M</p>
-            <p class="metric-label">Avg Value</p>
-        </div>
-    """, unsafe_allow_html=True)
-
 st.markdown("<div style='height: 1.5rem;'></div>", unsafe_allow_html=True)
 
-# Sort options
-sort_col1, sort_col2 = st.columns([3, 1])
-with sort_col1:
-    st.markdown(f'<p style="color: {COLORS["text_secondary"]}; font-size: 0.875rem;">Showing {len(filtered_df):,} transfers</p>', unsafe_allow_html=True)
+# Row display and sort controls
+control_col1, control_col2, control_col3 = st.columns([2, 1, 1])
 
-with sort_col2:
-    sort_by = st.selectbox(
-        "Sort by",
-        ["Value (High to Low)", "Value (Low to High)", "Rating (High to Low)", "Rating (Low to High)", "Player (A-Z)", "Date"],
-        label_visibility="collapsed"
-    )
+with control_col1:
+    # Row display options
+    rows_per_page_options = {"Show 25": 25, "Show 100": 100, "Show All": len(filtered_df) if len(filtered_df) > 0 else 1}
+    rows_selection = st.selectbox("Rows per page", list(rows_per_page_options.keys()), index=1, label_visibility="collapsed")
+    items_per_page = rows_per_page_options[rows_selection]
+
+with control_col2:
+    # Sort column selection
+    sort_columns = {
+        "Score (High to Low)": ("Score", False),
+        "Score (Low to High)": ("Score", True),
+        "Value (High to Low)": ("Value ($M)", False),
+        "Value (Low to High)": ("Value ($M)", True),
+        "Rating (High to Low)": ("Rating", False),
+        "Rating (Low to High)": ("Rating", True),
+        "Player (A-Z)": ("Player", True),
+        "Player (Z-A)": ("Player", False),
+        "Date Transferred": ("Date Transferred", False),
+    }
+    sort_by = st.selectbox("Sort by", list(sort_columns.keys()), label_visibility="collapsed")
+
+with control_col3:
+    st.markdown(f'<p style="color: {COLORS["text_secondary"]}; font-size: 0.875rem; padding: 0.5rem 0;">Showing {len(filtered_df):,} transfers</p>', unsafe_allow_html=True)
 
 # Apply sorting
-if sort_by == "Value (High to Low)":
-    filtered_df = filtered_df.sort_values("Value ($M)", ascending=False)
-elif sort_by == "Value (Low to High)":
-    filtered_df = filtered_df.sort_values("Value ($M)", ascending=True)
-elif sort_by == "Rating (High to Low)":
-    filtered_df = filtered_df.sort_values("Rating", ascending=False)
-elif sort_by == "Rating (Low to High)":
-    filtered_df = filtered_df.sort_values("Rating", ascending=True)
-elif sort_by == "Player (A-Z)":
-    filtered_df = filtered_df.sort_values("Player", ascending=True)
+sort_col, ascending = sort_columns[sort_by]
+filtered_df = filtered_df.sort_values(sort_col, ascending=ascending)
 
 # Pagination
-items_per_page = 25
-total_pages = max(1, (len(filtered_df) - 1) // items_per_page + 1)
+total_records = len(filtered_df)
+total_pages = max(1, (total_records - 1) // items_per_page + 1)
 
 if "db_page" not in st.session_state:
     st.session_state.db_page = 1
@@ -237,28 +233,34 @@ if st.session_state.db_page > total_pages:
     st.session_state.db_page = 1
 
 start_idx = (st.session_state.db_page - 1) * items_per_page
-end_idx = start_idx + items_per_page
+end_idx = min(start_idx + items_per_page, total_records)
 page_df = filtered_df.iloc[start_idx:end_idx]
+
+# Display showing info
+st.markdown(f'<p style="color: {COLORS["text_muted"]}; font-size: 0.8125rem; margin-bottom: 0.5rem;">Showing {start_idx + 1}-{end_idx} of {total_records:,} transfers</p>', unsafe_allow_html=True)
 
 # Display table
 if len(page_df) > 0:
-    # Build HTML table
+    # Build HTML table with sortable headers
     table_rows = ""
     for _, row in page_df.iterrows():
         type_badge = f'<span class="inflow-badge">IN</span>' if row["Type"] == "Inflow" else f'<span class="outflow-badge">OUT</span>'
         value_color = COLORS["accent_success"] if row["Type"] == "Inflow" else COLORS["chart_negative"]
+        score_color = COLORS["accent_success"] if row["Score"] > 0 else COLORS["text_secondary"]
 
         table_rows += f"""
         <tr>
             <td>{type_badge}</td>
             <td><strong>{row["Player"]}</strong></td>
             <td><span class="player-position">{row["Position"]}</span></td>
+            <td><span class="player-class">{row["Class"]}</span></td>
             <td>{row["From"]}</td>
             <td>{row["To"]}</td>
             <td>{row["Rating"]:.4f}</td>
+            <td style="color: {score_color}; font-weight: 600;">{row["Score"]:.1f}</td>
             <td style="color: {value_color}; font-weight: 600;">${row["Value ($M)"]:.2f}M</td>
             <td>{row["Games"]}</td>
-            <td style="color: {COLORS['text_muted']};">{row["Date"]}</td>
+            <td style="color: {COLORS['text_muted']};">{row["Date Transferred"]}</td>
         </tr>
         """
 
@@ -270,12 +272,14 @@ if len(page_df) > 0:
                         <th>Type</th>
                         <th>Player</th>
                         <th>Pos</th>
+                        <th>Class</th>
                         <th>From</th>
                         <th>To</th>
                         <th>Rating</th>
+                        <th>Score</th>
                         <th>Value</th>
                         <th>Games</th>
-                        <th>Date</th>
+                        <th>Date Transferred</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -286,36 +290,37 @@ if len(page_df) > 0:
     """, unsafe_allow_html=True)
 
     # Pagination controls
-    st.markdown("<div style='height: 1rem;'></div>", unsafe_allow_html=True)
+    if total_pages > 1:
+        st.markdown("<div style='height: 1rem;'></div>", unsafe_allow_html=True)
 
-    pag_col1, pag_col2, pag_col3, pag_col4, pag_col5 = st.columns([1, 1, 2, 1, 1])
+        pag_col1, pag_col2, pag_col3, pag_col4, pag_col5 = st.columns([1, 1, 2, 1, 1])
 
-    with pag_col1:
-        if st.button("← First", disabled=st.session_state.db_page == 1, use_container_width=True):
-            st.session_state.db_page = 1
-            st.rerun()
+        with pag_col1:
+            if st.button("← First", disabled=st.session_state.db_page == 1, use_container_width=True):
+                st.session_state.db_page = 1
+                st.rerun()
 
-    with pag_col2:
-        if st.button("‹ Prev", disabled=st.session_state.db_page == 1, use_container_width=True):
-            st.session_state.db_page -= 1
-            st.rerun()
+        with pag_col2:
+            if st.button("‹ Prev", disabled=st.session_state.db_page == 1, use_container_width=True):
+                st.session_state.db_page -= 1
+                st.rerun()
 
-    with pag_col3:
-        st.markdown(f"""
-            <div style="text-align: center; padding: 0.5rem; color: {COLORS['text_secondary']}; font-size: 0.875rem;">
-                Page {st.session_state.db_page} of {total_pages}
-            </div>
-        """, unsafe_allow_html=True)
+        with pag_col3:
+            st.markdown(f"""
+                <div style="text-align: center; padding: 0.5rem; color: {COLORS['text_secondary']}; font-size: 0.875rem;">
+                    Page {st.session_state.db_page} of {total_pages}
+                </div>
+            """, unsafe_allow_html=True)
 
-    with pag_col4:
-        if st.button("Next ›", disabled=st.session_state.db_page == total_pages, use_container_width=True):
-            st.session_state.db_page += 1
-            st.rerun()
+        with pag_col4:
+            if st.button("Next ›", disabled=st.session_state.db_page == total_pages, use_container_width=True):
+                st.session_state.db_page += 1
+                st.rerun()
 
-    with pag_col5:
-        if st.button("Last →", disabled=st.session_state.db_page == total_pages, use_container_width=True):
-            st.session_state.db_page = total_pages
-            st.rerun()
+        with pag_col5:
+            if st.button("Last →", disabled=st.session_state.db_page == total_pages, use_container_width=True):
+                st.session_state.db_page = total_pages
+                st.rerun()
 
 else:
     st.markdown(f"""
@@ -331,7 +336,7 @@ st.markdown("<div style='height: 2rem;'></div>", unsafe_allow_html=True)
 st.markdown(
     f"""
     <div style="text-align: center; color: {COLORS['text_muted']}; font-size: 0.75rem; padding: 1.5rem 0; border-top: 1px solid {COLORS['border']};">
-        Transfer Portal Database &middot; Data sourced from 247Sports, ESPN, On3
+        NIL or Nothing • Transfer Portal Database • Sample Data for Demonstration
     </div>
     """,
     unsafe_allow_html=True

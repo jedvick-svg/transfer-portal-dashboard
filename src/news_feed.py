@@ -1,50 +1,62 @@
 """
-News Feed for Transfer Portal Updates
+News Feed for Transfer Portal Updates - NIL or Nothing
 
 Fetches and displays latest transfer portal news from various sources.
-In production, this would use APIs or RSS feeds. For now, using mock data.
+In production, this would use APIs or RSS feeds. For now, using sample data.
+
+NOTE: This uses SAMPLE DATA for demonstration purposes.
+Real-time news would require integration with sports news APIs.
 """
 
 import random
 from datetime import datetime, timedelta
 from typing import List, Dict
 
-# Mock news data - in production, this would be scraped/fetched from APIs
+# Sample news data - in production, this would be scraped/fetched from APIs
 MOCK_NEWS = [
+    # Commitments
     {
         "source": "ESPN",
         "title": "Five-star QB Jayden Michaels commits to Georgia from Oregon transfer portal",
-        "summary": "The highly-touted quarterback announced his decision via social media, citing the Bulldogs' pro-style offense.",
+        "summary": "The highly-touted quarterback announced his decision via social media, citing the Bulldogs' pro-style offense and NIL opportunities.",
         "url": "https://espn.com",
         "category": "commitment"
     },
     {
         "source": "247Sports",
         "title": "BREAKING: Alabama lands top-rated portal WR from USC",
-        "summary": "The Crimson Tide continues to reload at receiver with another high-profile addition.",
+        "summary": "The Crimson Tide continues to reload at receiver with another high-profile addition worth an estimated $1.2M NIL deal.",
         "url": "https://247sports.com",
         "category": "commitment"
     },
     {
-        "source": "On3",
-        "title": "Ohio State starting linebacker enters transfer portal",
-        "summary": "The two-year starter announced his decision following the coaching staff changes.",
-        "url": "https://on3.com",
-        "category": "entry"
-    },
-    {
-        "source": "Twitter / X",
-        "title": "Pete Thamel: Texas expected to land commitment from portal OT this week",
-        "summary": "Sources indicate the Longhorns are the frontrunner for the former SEC starter.",
-        "url": "https://twitter.com",
-        "category": "rumor"
+        "source": "247Sports",
+        "title": "Colorado adds fourth portal commit as Deion Sanders reloads roster",
+        "summary": "The Buffaloes continue aggressive portal strategy entering Year 3 of the Coach Prime era.",
+        "url": "https://247sports.com",
+        "category": "commitment"
     },
     {
         "source": "Rivals",
-        "title": "Transfer Portal Rankings Update: Top 50 players still available",
-        "summary": "Our updated rankings of the best players still looking for a new home.",
+        "title": "Oklahoma rebuilding secondary through portal acquisitions",
+        "summary": "Sooners have added three DBs in the last week to address key need ahead of SEC play.",
         "url": "https://rivals.com",
-        "category": "analysis"
+        "category": "commitment"
+    },
+    {
+        "source": "On3",
+        "title": "Texas lands former All-SEC offensive tackle from Florida",
+        "summary": "The Longhorns add a key piece to their offensive line with a proven SEC starter.",
+        "url": "https://on3.com",
+        "category": "commitment"
+    },
+    # Portal Entries
+    {
+        "source": "On3",
+        "title": "Ohio State starting linebacker enters transfer portal",
+        "summary": "The two-year starter announced his decision following the coaching staff changes this offseason.",
+        "url": "https://on3.com",
+        "category": "entry"
     },
     {
         "source": "ESPN",
@@ -55,45 +67,105 @@ MOCK_NEWS = [
     },
     {
         "source": "On3",
-        "title": "NIL Analysis: What top portal targets are commanding in the market",
-        "summary": "Breaking down the financial landscape of this year's most sought-after transfers.",
+        "title": "BREAKING: Former five-star RB enters portal after position change request",
+        "summary": "The talented back was asked to move to receiver and declined, now seeking a fresh start.",
         "url": "https://on3.com",
-        "category": "analysis"
+        "category": "entry"
     },
     {
         "source": "247Sports",
-        "title": "Colorado adds fourth portal commit as Deion Sanders reloads roster",
-        "summary": "The Buffaloes continue aggressive portal strategy entering Year 3.",
+        "title": "Auburn QB enters portal after losing starting job competition",
+        "summary": "The redshirt junior will seek a starting opportunity elsewhere after two seasons as a backup.",
         "url": "https://247sports.com",
-        "category": "commitment"
+        "category": "entry"
+    },
+    # Official Visits
+    {
+        "source": "247Sports",
+        "title": "Top portal CB schedules official visit to USC this weekend",
+        "summary": "The former SEC starter is down to USC, Oregon, and Miami as he makes his final decision.",
+        "url": "https://247sports.com",
+        "category": "visit"
+    },
+    {
+        "source": "On3",
+        "title": "Five-star portal WR completes Texas A&M official visit",
+        "summary": "The Aggies made a strong impression with NIL presentation and facility tour.",
+        "url": "https://on3.com",
+        "category": "visit"
+    },
+    {
+        "source": "Rivals",
+        "title": "Penn State hosting three top portal targets this weekend",
+        "summary": "The Nittany Lions looking to close strong on key defensive additions.",
+        "url": "https://rivals.com",
+        "category": "visit"
+    },
+    # De-commitments
+    {
+        "source": "ESPN",
+        "title": "BREAKING: Portal commit flips from Ole Miss to Alabama",
+        "summary": "The four-star defensive tackle changed his decision after a late visit to Tuscaloosa.",
+        "url": "https://espn.com",
+        "category": "decommit"
+    },
+    {
+        "source": "On3",
+        "title": "Tennessee portal commit backs off pledge, reopens recruitment",
+        "summary": "The former Pac-12 starter cited 'personal reasons' for reopening his recruitment.",
+        "url": "https://on3.com",
+        "category": "decommit"
+    },
+    # Rumors
+    {
+        "source": "Twitter / X",
+        "title": "Pete Thamel: Texas expected to land commitment from portal OT this week",
+        "summary": "Sources indicate the Longhorns are the frontrunner for the former SEC starter.",
+        "url": "https://twitter.com",
+        "category": "rumor"
     },
     {
         "source": "Twitter / X",
         "title": "Bruce Feldman: Penn State in final three for top portal DT",
-        "summary": "The Nittany Lions pushing hard to add interior defensive line depth.",
+        "summary": "The Nittany Lions pushing hard to add interior defensive line depth for 2026.",
+        "url": "https://twitter.com",
+        "category": "rumor"
+    },
+    {
+        "source": "Twitter / X",
+        "title": "Matt Zenitz: Florida State portal target down to FSU and Miami",
+        "summary": "In-state battle brewing for talented defensive back with a decision expected soon.",
         "url": "https://twitter.com",
         "category": "rumor"
     },
     {
         "source": "Rivals",
         "title": "EXCLUSIVE: Inside LSU's portal pitch to top remaining recruits",
-        "summary": "Tigers selling NIL opportunities and immediate playing time to targets.",
+        "summary": "Tigers selling NIL opportunities and immediate playing time to priority targets.",
         "url": "https://rivals.com",
+        "category": "rumor"
+    },
+    # Analysis
+    {
+        "source": "Rivals",
+        "title": "Transfer Portal Rankings Update: Top 50 players still available",
+        "summary": "Our updated rankings of the best players still looking for a new home in 2026.",
+        "url": "https://rivals.com",
+        "category": "analysis"
+    },
+    {
+        "source": "On3",
+        "title": "NIL Analysis: What top portal targets are commanding in the market",
+        "summary": "Breaking down the financial landscape of this year's most sought-after transfers.",
+        "url": "https://on3.com",
         "category": "analysis"
     },
     {
         "source": "ESPN",
         "title": "Notre Dame quietly building elite portal class under radar",
-        "summary": "The Irish have secured commitments from three four-star portal entries.",
+        "summary": "The Irish have secured commitments from three four-star portal entries with minimal fanfare.",
         "url": "https://espn.com",
         "category": "analysis"
-    },
-    {
-        "source": "On3",
-        "title": "BREAKING: Former five-star RB enters portal after position change",
-        "summary": "The talented back was asked to move to receiver and declined.",
-        "url": "https://on3.com",
-        "category": "entry"
     },
     {
         "source": "247Sports",
@@ -103,18 +175,11 @@ MOCK_NEWS = [
         "category": "analysis"
     },
     {
-        "source": "Twitter / X",
-        "title": "Matt Zenitz: Florida State portal target down to FSU and Miami",
-        "summary": "In-state battle brewing for talented defensive back.",
-        "url": "https://twitter.com",
-        "category": "rumor"
-    },
-    {
-        "source": "Rivals",
-        "title": "Oklahoma rebuilding secondary through portal acquisitions",
-        "summary": "Sooners have added three DBs in the last week to address key need.",
-        "url": "https://rivals.com",
-        "category": "commitment"
+        "source": "On3",
+        "title": "Portal Class Rankings: Who's winning the 2026 transfer window?",
+        "summary": "Georgia, Alabama, and Texas lead our composite rankings of portal success this cycle.",
+        "url": "https://on3.com",
+        "category": "analysis"
     },
 ]
 
@@ -189,7 +254,9 @@ def get_news_categories() -> List[Dict]:
         {"id": "all", "label": "All News", "icon": "list"},
         {"id": "commitment", "label": "Commitments", "icon": "checkmark-circle"},
         {"id": "entry", "label": "Portal Entries", "icon": "arrow-right-circle"},
-        {"id": "rumor", "label": "Rumors & Reports", "icon": "information-circle"},
+        {"id": "visit", "label": "Official Visits", "icon": "calendar"},
+        {"id": "decommit", "label": "De-commits", "icon": "close-circle"},
+        {"id": "rumor", "label": "Rumors", "icon": "information-circle"},
         {"id": "analysis", "label": "Analysis", "icon": "bar-chart"},
     ]
 

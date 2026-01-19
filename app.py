@@ -1,26 +1,24 @@
 """
-Transfer Portal Dashboard - Main Application
+NIL or Nothing - Transfer Portal Dashboard
 
-A modern, polished dashboard for tracking college football transfer portal activity.
-Inspired by Linear, Vercel, and Stripe's dashboard aesthetic.
+A modern analytics dashboard for tracking college football transfer portal activity.
+Teams are ranked by their composite SCORE, not dollar value.
 
-Version: 1.1.0
+Version: 2.0.0
 """
 
 import streamlit as st
-import plotly.express as px
 import plotly.graph_objects as go
 
-# Import our modules
 from src.theme import (
-    get_custom_css, COLORS, render_top_nav, render_metric_card_clickable,
-    render_team_card_clickable, get_team_logo
+    get_custom_css, COLORS, render_brand_header, render_metric_card,
+    render_team_row, render_sample_data_banner, get_team_logo
 )
-from src.data import get_team_data, get_summary_stats
+from src.data import get_team_data, get_summary_stats, CONFERENCES
 
 # Page configuration
 st.set_page_config(
-    page_title="Transfer Portal Dashboard",
+    page_title="NIL or Nothing | Transfer Portal Rankings",
     page_icon="🏈",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -29,37 +27,45 @@ st.set_page_config(
 # Apply custom CSS
 st.markdown(get_custom_css(), unsafe_allow_html=True)
 
-# Top navigation bar
-st.markdown(render_top_nav(active_page="home"), unsafe_allow_html=True)
+# Brand header
+st.markdown(render_brand_header(), unsafe_allow_html=True)
+
+# Sample data notice
+st.markdown(render_sample_data_banner(), unsafe_allow_html=True)
 
 # Get data
 stats = get_summary_stats()
 team_df = get_team_data()
 
-# Sidebar
+# Navigation using Streamlit's native page links
 with st.sidebar:
     st.markdown(f"""
         <div style="margin-bottom: 1.5rem;">
-            <h3 style="font-size: 0.875rem; font-weight: 600; color: {COLORS['text_primary']}; margin-bottom: 0.25rem;">Filters</h3>
-            <p style="font-size: 0.75rem; color: {COLORS['text_muted']};">Customize your view</p>
+            <div style="font-family: 'Playfair Display', serif; font-size: 1.25rem; font-weight: 800; color: {COLORS['text_primary']}; text-transform: uppercase;">
+                NIL <span style="color: {COLORS['accent_primary']};">or</span> Nothing
+            </div>
+            <p style="font-size: 0.75rem; color: {COLORS['text_muted']}; margin-top: 0.25rem;">2026 Transfer Portal</p>
+        </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("### Navigation")
+    st.page_link("app.py", label="🏠 Home", icon=None)
+    st.page_link("pages/1_Team_Details.py", label="📋 Teams", icon=None)
+    st.page_link("pages/4_Database.py", label="📊 Database", icon=None)
+    st.page_link("pages/3_Live_Feed.py", label="📰 News", icon=None)
+    st.page_link("pages/5_About.py", label="ℹ️ About", icon=None)
+
+    st.markdown("---")
+
+    st.markdown(f"""
+        <div style="margin-bottom: 1rem;">
+            <p style="font-size: 0.75rem; font-weight: 600; color: {COLORS['text_muted']}; text-transform: uppercase; letter-spacing: 0.05em;">Filters</p>
         </div>
     """, unsafe_allow_html=True)
 
     # Conference filter
-    conferences = ["All Conferences"] + sorted(team_df["conference"].unique().tolist())
+    conferences = ["All Conferences"] + list(CONFERENCES.keys())
     selected_conference = st.selectbox("Conference", conferences, label_visibility="collapsed")
-
-    st.markdown("<div style='height: 1rem;'></div>", unsafe_allow_html=True)
-
-    # Sort options
-    sort_options = {
-        "Portal Rank": "rank",
-        "Net Value (High to Low)": "net_value",
-        "Total Inflow Value": "inflow_value",
-        "Average Rating": "avg_rating",
-        "Most Transfers": "inflows"
-    }
-    sort_by = st.selectbox("Sort By", list(sort_options.keys()), label_visibility="collapsed")
 
     st.markdown("---")
 
@@ -67,37 +73,40 @@ with st.sidebar:
         f"""
         <div style="color: {COLORS['text_muted']}; font-size: 0.6875rem; line-height: 1.5;">
             <p style="margin-bottom: 0.25rem;">Last updated: Jan 18, 2026</p>
-            <p>Data: 247Sports, ESPN, On3</p>
+            <p>Data: Sample Data (Demo)</p>
         </div>
         """,
         unsafe_allow_html=True
     )
 
 # Header
-st.markdown('<h1 class="main-header">Transfer Portal Dashboard</h1>', unsafe_allow_html=True)
-st.markdown('<p class="sub-header">Track college football transfer portal activity with real-time rankings and analysis</p>', unsafe_allow_html=True)
+st.markdown('<h1 class="main-header">Transfer Portal Rankings</h1>', unsafe_allow_html=True)
+st.markdown('<p class="sub-header">Teams ranked by composite transfer score for the 2026 offseason</p>', unsafe_allow_html=True)
 
-# Clickable metrics row
+# Metrics row
 col1, col2, col3, col4 = st.columns(4, gap="medium")
 
 with col1:
     st.markdown(
-        render_metric_card_clickable(f"{stats['total_transfers']:,}", "Total Transfers", "default", "/Database"),
+        render_metric_card(f"{stats['total_transfers']:,}", "Total Transfers", "default"),
         unsafe_allow_html=True
     )
+
 with col2:
     st.markdown(
-        render_metric_card_clickable(f"${stats['total_value']}M", "Total Value", "success", "/Database"),
+        render_metric_card(f"${stats['total_nil_spent']:.1f}M", "Total NIL Spent", "success"),
         unsafe_allow_html=True
     )
+
 with col3:
     st.markdown(
-        render_metric_card_clickable(f"{stats['avg_rating']}", "Avg Rating", "warning", "/Database"),
+        render_metric_card(f"{stats['avg_score']:.1f}", "Avg Team Score", "warning"),
         unsafe_allow_html=True
     )
+
 with col4:
     st.markdown(
-        render_metric_card_clickable(f"{stats['teams_tracked']}", "Teams Tracked", "info", "/Database"),
+        render_metric_card(f"{stats['teams_tracked']}", "Teams Tracked", "info"),
         unsafe_allow_html=True
     )
 
@@ -108,142 +117,121 @@ filtered_df = team_df.copy()
 if selected_conference != "All Conferences":
     filtered_df = filtered_df[filtered_df["conference"] == selected_conference]
 
-# Sort data
-sort_col = sort_options[sort_by]
-ascending = sort_col == "rank"
-filtered_df = filtered_df.sort_values(sort_col, ascending=ascending)
-
-# Main content - two columns with better proportions
+# Main content
 col_left, col_right = st.columns([3, 2], gap="large")
 
 with col_left:
-    st.markdown('<div class="section-header">Top 25 Team Rankings</div>', unsafe_allow_html=True)
-    st.markdown(f'<p style="color: {COLORS["text_muted"]}; font-size: 0.8125rem; margin-bottom: 1rem;">Click any team to view detailed transfer activity</p>', unsafe_allow_html=True)
+    st.markdown('<div class="section-header">Team Rankings by Score</div>', unsafe_allow_html=True)
+    st.markdown(f'<p style="color: {COLORS["text_muted"]}; font-size: 0.8125rem; margin-bottom: 1rem;">Score = Σ(Incoming Player Scores) − Σ(Outgoing Player Scores)</p>', unsafe_allow_html=True)
 
-    # Create clickable team list with logos
+    # Build the team rankings table
+    table_rows = ""
     for _, row in filtered_df.iterrows():
         logo_url = get_team_logo(row['team'])
-        st.markdown(
-            render_team_card_clickable(
-                rank=row['rank'],
-                team=row['team'],
-                conference=row['conference'],
-                value=row['inflow_value'],
-                net_value=row['net_value'],
-                logo_url=logo_url
-            ),
-            unsafe_allow_html=True
+
+        # Format offensive/defensive player counts
+        off_display = f"+{row['offensive_in']}/−{row['offensive_out']}"
+        def_display = f"+{row['defensive_in']}/−{row['defensive_out']}"
+
+        table_rows += render_team_row(
+            rank=row['rank'],
+            team=row['team'],
+            logo_url=logo_url,
+            score=row['score'],
+            nil_spent=row['nil_spent'],
+            off_players=off_display,
+            def_players=def_display,
+            conference=row['conference']
         )
 
+    st.markdown(f"""
+        <div class="team-table-container">
+            <table class="team-table">
+                <thead>
+                    <tr>
+                        <th style="width: 50px;">Rank</th>
+                        <th>Team</th>
+                        <th>Score</th>
+                        <th>NIL Spent</th>
+                        <th>Off +/−</th>
+                        <th>Def +/−</th>
+                        <th>Conf</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {table_rows}
+                </tbody>
+            </table>
+        </div>
+    """, unsafe_allow_html=True)
+
 with col_right:
-    # Value chart with professional colors
-    st.markdown('<div class="section-header">Transfer Value by Team</div>', unsafe_allow_html=True)
+    # Score by team chart
+    st.markdown('<div class="section-header">Transfer Score by Team</div>', unsafe_allow_html=True)
 
     chart_df = filtered_df.head(10).copy()
+    chart_df = chart_df.sort_values('score', ascending=True)
 
-    fig = go.Figure()
+    # Color bars based on positive/negative score
+    colors = [COLORS["chart_positive"] if s >= 0 else COLORS["chart_negative"] for s in chart_df["score"]]
 
-    # Inflow bars - teal
-    fig.add_trace(go.Bar(
+    fig = go.Figure(go.Bar(
         y=chart_df["team"],
-        x=chart_df["inflow_value"],
-        name="Inflow Value",
+        x=chart_df["score"],
         orientation="h",
-        marker_color=COLORS["chart_positive"],
-    ))
-
-    # Outflow bars - orange (softer)
-    fig.add_trace(go.Bar(
-        y=chart_df["team"],
-        x=-chart_df["outflow_value"],
-        name="Outflow Value",
-        orientation="h",
-        marker_color=COLORS["chart_negative"],
+        marker_color=colors,
+        text=[f"{s:+.1f}" for s in chart_df["score"]],
+        textposition="outside",
+        textfont=dict(size=11),
     ))
 
     fig.update_layout(
-        barmode="relative",
         plot_bgcolor=COLORS["bg_card"],
         paper_bgcolor=COLORS["bg_card"],
         font=dict(color=COLORS["text_secondary"], family="Inter, -apple-system, sans-serif", size=12),
-        showlegend=True,
-        legend=dict(
-            orientation="h",
-            yanchor="bottom",
-            y=1.02,
-            xanchor="right",
-            x=1,
-            font=dict(size=11)
-        ),
-        margin=dict(l=0, r=20, t=40, b=0),
-        height=420,
+        margin=dict(l=0, r=60, t=20, b=0),
+        height=400,
         xaxis=dict(
-            title="Value ($M)",
+            title="Score",
             titlefont=dict(size=11, color=COLORS["text_muted"]),
             gridcolor=COLORS["border"],
             zerolinecolor=COLORS["border"],
-            tickfont=dict(size=11),
         ),
         yaxis=dict(
             gridcolor=COLORS["border_light"],
-            autorange="reversed",
-            tickfont=dict(size=11),
         ),
     )
 
     st.plotly_chart(fig, use_container_width=True)
 
-    # Conference breakdown with professional colors
-    st.markdown('<div class="section-header">By Conference</div>', unsafe_allow_html=True)
+    # Conference breakdown
+    st.markdown('<div class="section-header">Score by Conference</div>', unsafe_allow_html=True)
 
     conf_df = team_df.groupby("conference").agg({
-        "inflow_value": "sum",
-        "outflow_value": "sum",
+        "score": "sum",
+        "nil_spent": "sum",
         "team": "count"
     }).reset_index()
-    conf_df.columns = ["Conference", "Inflow Value", "Outflow Value", "Teams"]
-    conf_df["Net Value"] = conf_df["Inflow Value"] - conf_df["Outflow Value"]
-    conf_df = conf_df.sort_values("Net Value", ascending=False)
+    conf_df.columns = ["Conference", "Total Score", "NIL Spent", "Teams"]
+    conf_df = conf_df.sort_values("Total Score", ascending=False)
 
-    # Professional color palette for pie chart
-    pie_colors = [
-        COLORS["chart_primary"],    # Indigo
-        COLORS["chart_secondary"],  # Purple
-        COLORS["chart_tertiary"],   # Sky blue
-        COLORS["accent_success"],   # Teal
-        COLORS["accent_warning"],   # Amber
-        "#ec4899",                   # Pink
-    ]
-
-    fig2 = px.pie(
-        conf_df,
-        values="Inflow Value",
-        names="Conference",
-        color_discrete_sequence=pie_colors
-    )
-
-    fig2.update_traces(
-        textposition='inside',
-        textinfo='percent+label',
-        textfont=dict(size=11, color='white'),
-        marker=dict(line=dict(color=COLORS["bg_card"], width=2))
-    )
+    # Conference score chart
+    fig2 = go.Figure(go.Bar(
+        x=conf_df["Conference"],
+        y=conf_df["Total Score"],
+        marker_color=[COLORS["chart_positive"] if s >= 0 else COLORS["chart_negative"] for s in conf_df["Total Score"]],
+        text=[f"{s:+.0f}" for s in conf_df["Total Score"]],
+        textposition="outside",
+    ))
 
     fig2.update_layout(
         plot_bgcolor=COLORS["bg_card"],
         paper_bgcolor=COLORS["bg_card"],
-        font=dict(color=COLORS["text_secondary"], family="Inter, -apple-system, sans-serif"),
+        font=dict(color=COLORS["text_secondary"], family="Inter, -apple-system, sans-serif", size=11),
         margin=dict(l=0, r=0, t=20, b=0),
-        height=280,
-        showlegend=True,
-        legend=dict(
-            font=dict(size=11),
-            orientation="h",
-            yanchor="bottom",
-            y=-0.15,
-            xanchor="center",
-            x=0.5
-        )
+        height=250,
+        xaxis=dict(tickangle=-45),
+        yaxis=dict(title="Total Score", gridcolor=COLORS["border"]),
     )
 
     st.plotly_chart(fig2, use_container_width=True)
@@ -253,7 +241,7 @@ st.markdown("<div style='height: 2rem;'></div>", unsafe_allow_html=True)
 st.markdown(
     f"""
     <div style="text-align: center; color: {COLORS['text_muted']}; font-size: 0.75rem; padding: 1.5rem 0; border-top: 1px solid {COLORS['border']};">
-        Transfer Portal Dashboard &middot; Data sourced from 247Sports, ESPN, On3 &middot; Built with Streamlit
+        NIL or Nothing • Transfer Portal Analytics • Sample Data for Demonstration
     </div>
     """,
     unsafe_allow_html=True

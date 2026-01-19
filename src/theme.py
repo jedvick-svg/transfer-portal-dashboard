@@ -1,7 +1,7 @@
 """
-Modern SaaS theme for the Transfer Portal Dashboard.
+NIL or Nothing - Modern Theme for Transfer Portal Dashboard.
 Inspired by Linear, Vercel, and Stripe's dashboard aesthetic.
-Clean, light, professional design with generous whitespace.
+Clean, light, professional design with sports-inspired branding.
 """
 
 # Modern SaaS color palette - light theme with professional accents
@@ -73,7 +73,7 @@ TEAM_COLORS = {
     "Missouri": {"primary": "#F1B82D", "secondary": "#000000"},
 }
 
-# Team logos using ESPN CDN (reliable, high-quality logos)
+# Team logos using ESPN CDN
 TEAM_LOGOS = {
     "Georgia": "https://a.espncdn.com/i/teamlogos/ncaa/500/61.png",
     "Alabama": "https://a.espncdn.com/i/teamlogos/ncaa/500/333.png",
@@ -109,15 +109,17 @@ def get_team_logo(team_name: str) -> str:
 
 
 def get_custom_css():
-    """Return custom CSS for the modern SaaS light theme."""
+    """Return custom CSS for the modern SaaS light theme with NIL or Nothing branding."""
     return f"""
     <style>
-        /* Import modern fonts */
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        /* Import fonts - Oswald for brand, Playfair Display for serif option, Inter for body */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Oswald:wght@500;600;700&family=Playfair+Display:wght@700;800;900&display=swap');
 
-        /* CSS Variables for easy theming */
+        /* CSS Variables */
         :root {{
             --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            --font-brand: 'Playfair Display', Georgia, 'Times New Roman', serif;
+            --font-sports: 'Oswald', 'Impact', sans-serif;
             --radius-sm: 6px;
             --radius-md: 10px;
             --radius-lg: 16px;
@@ -132,80 +134,59 @@ def get_custom_css():
             font-family: var(--font-sans);
         }}
 
-        /* Hide default Streamlit elements */
+        /* Hide default Streamlit elements but keep sidebar toggle visible */
         #MainMenu {{visibility: hidden;}}
         footer {{visibility: hidden;}}
-        header {{visibility: hidden;}}
 
-        /* Main content area - add padding for top nav */
+        /* Hide header content but keep the sidebar collapse button functional */
+        header [data-testid="stHeader"] {{
+            background: transparent;
+        }}
+
+        /* Ensure sidebar collapse/expand button is always visible */
+        [data-testid="collapsedControl"] {{
+            visibility: visible !important;
+            display: flex !important;
+        }}
+
+        /* Main content area */
         .main .block-container {{
             padding: 1rem 3rem 2rem 3rem;
             max-width: 1400px;
         }}
 
-        /* ========== TOP NAVIGATION BAR ========== */
-        .top-nav {{
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 56px;
-            background: {COLORS['bg_primary']};
-            border-bottom: 1px solid {COLORS['border']};
+        /* ========== BRAND HEADER ========== */
+        .brand-header {{
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 2rem;
-            z-index: 1000;
-            box-shadow: {COLORS['shadow_sm']};
+            padding: 1rem 0 1.5rem 0;
+            border-bottom: 2px solid {COLORS['border']};
+            margin-bottom: 1.5rem;
         }}
 
-        .top-nav-brand {{
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            font-weight: 700;
-            font-size: 1.125rem;
+        .brand-logo {{
+            font-family: var(--font-brand);
+            font-size: 2rem;
+            font-weight: 800;
             color: {COLORS['text_primary']};
+            letter-spacing: -0.02em;
+            text-transform: uppercase;
         }}
 
-        .top-nav-links {{
-            display: flex;
-            align-items: center;
-            gap: 0.25rem;
-        }}
-
-        .top-nav-link {{
-            padding: 0.5rem 1rem;
-            border-radius: var(--radius-sm);
-            font-size: 0.875rem;
-            font-weight: 500;
-            color: {COLORS['text_secondary']};
-            text-decoration: none;
-            transition: all var(--transition-fast);
-        }}
-
-        .top-nav-link:hover {{
-            background: {COLORS['bg_secondary']};
-            color: {COLORS['text_primary']};
-        }}
-
-        .top-nav-link.active {{
-            background: {COLORS['accent_primary']}15;
+        .brand-logo .accent {{
             color: {COLORS['accent_primary']};
         }}
 
-        /* Spacer for fixed top nav */
-        .nav-spacer {{
-            height: 56px;
+        .brand-tagline {{
+            font-size: 0.75rem;
+            color: {COLORS['text_muted']};
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-top: 0.25rem;
         }}
 
-        /* ========== CLICKABLE STAT CARDS ========== */
-        .metric-card-link {{
-            text-decoration: none;
-            display: block;
-        }}
-
+        /* ========== METRIC CARDS ========== */
         .metric-card {{
             background: {COLORS['bg_card']};
             border: 1px solid {COLORS['border']};
@@ -214,34 +195,23 @@ def get_custom_css():
             padding: 1.25rem 1.5rem;
             box-shadow: {COLORS['shadow_sm']};
             transition: all var(--transition-normal);
-            cursor: pointer;
         }}
 
         .metric-card:hover {{
             box-shadow: {COLORS['shadow_md']};
-            transform: translateY(-3px);
-            border-color: {COLORS['accent_primary']};
+            transform: translateY(-2px);
         }}
 
         .metric-card.success {{
             border-left-color: {COLORS['accent_success']};
         }}
-        .metric-card.success:hover {{
-            border-color: {COLORS['accent_success']};
-        }}
 
         .metric-card.warning {{
             border-left-color: {COLORS['accent_warning']};
         }}
-        .metric-card.warning:hover {{
-            border-color: {COLORS['accent_warning']};
-        }}
 
         .metric-card.info {{
             border-left-color: {COLORS['accent_info']};
-        }}
-        .metric-card.info:hover {{
-            border-color: {COLORS['accent_info']};
         }}
 
         .metric-value {{
@@ -261,7 +231,7 @@ def get_custom_css():
             margin-top: 0.375rem;
         }}
 
-        /* Custom header */
+        /* Custom headers */
         .main-header {{
             font-size: 2.25rem;
             font-weight: 800;
@@ -279,143 +249,127 @@ def get_custom_css():
             line-height: 1.5;
         }}
 
-        /* ========== CLICKABLE TEAM CARDS ========== */
-        .team-card-link {{
-            text-decoration: none;
-            display: block;
-        }}
-
-        .team-card {{
+        /* ========== TEAM TABLE ========== */
+        .team-table-container {{
             background: {COLORS['bg_card']};
             border: 1px solid {COLORS['border']};
-            border-radius: var(--radius-md);
-            padding: 1rem 1.25rem;
-            margin-bottom: 0.5rem;
-            transition: all var(--transition-fast);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            box-shadow: {COLORS['shadow_sm']};
+        }}
+
+        .team-table {{
+            width: 100%;
+            border-collapse: collapse;
+        }}
+
+        .team-table th {{
+            background: {COLORS['bg_secondary']};
+            padding: 1rem;
+            text-align: left;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: {COLORS['text_muted']};
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid {COLORS['border']};
             cursor: pointer;
+            user-select: none;
+        }}
+
+        .team-table th:hover {{
+            background: {COLORS['border_light']};
+        }}
+
+        .team-table th .sort-arrow {{
+            margin-left: 0.5rem;
+            opacity: 0.5;
+        }}
+
+        .team-table th.sorted .sort-arrow {{
+            opacity: 1;
+        }}
+
+        .team-table td {{
+            padding: 0.875rem 1rem;
+            font-size: 0.875rem;
+            color: {COLORS['text_primary']};
+            border-bottom: 1px solid {COLORS['border_light']};
+            vertical-align: middle;
+        }}
+
+        .team-table tr:hover td {{
+            background: {COLORS['bg_card_hover']};
+        }}
+
+        .team-table tr:last-child td {{
+            border-bottom: none;
+        }}
+
+        .team-table .team-cell {{
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: 0.75rem;
         }}
 
-        .team-card:hover {{
-            background: {COLORS['bg_card_hover']};
-            border-color: {COLORS['accent_primary']};
-            box-shadow: {COLORS['shadow_md']};
-            transform: translateX(4px);
-        }}
-
-        .team-logo {{
-            width: 40px;
-            height: 40px;
-            border-radius: var(--radius-sm);
+        .team-table .team-logo {{
+            width: 32px;
+            height: 32px;
             object-fit: contain;
-            background: {COLORS['bg_secondary']};
-            padding: 4px;
         }}
 
-        .team-rank {{
-            font-size: 0.875rem;
+        .team-table .team-name {{
             font-weight: 600;
-            color: {COLORS['text_muted']};
-            min-width: 1.75rem;
         }}
 
-        .team-info {{
-            flex: 1;
-            min-width: 0;
+        .team-table .score-cell {{
+            font-weight: 700;
+            font-size: 1rem;
         }}
 
-        .team-name {{
-            font-size: 0.9375rem;
-            font-weight: 600;
-            color: {COLORS['text_primary']};
-            margin: 0;
-            line-height: 1.3;
-        }}
-
-        .team-conference {{
-            font-size: 0.75rem;
-            color: {COLORS['text_muted']};
-            margin-top: 0.125rem;
-        }}
-
-        .team-stats {{
-            text-align: right;
-            flex-shrink: 0;
-        }}
-
-        .team-value {{
-            font-size: 0.9375rem;
-            font-weight: 600;
-            color: {COLORS['text_primary']};
-        }}
-
-        .team-net {{
-            font-size: 0.75rem;
-            font-weight: 500;
-            margin-top: 0.125rem;
-        }}
-
-        .team-net.positive {{
+        .team-table .score-positive {{
             color: {COLORS['accent_success']};
         }}
 
-        .team-net.negative {{
+        .team-table .score-negative {{
             color: {COLORS['accent_danger']};
         }}
 
-        /* ========== SIDEBAR IMPROVEMENTS ========== */
+        .team-table .nil-cell {{
+            font-weight: 600;
+            color: {COLORS['accent_primary']};
+        }}
+
+        .team-table .players-cell {{
+            font-size: 0.8125rem;
+        }}
+
+        .team-table .conf-cell {{
+            background: {COLORS['bg_secondary']};
+            padding: 0.25rem 0.625rem;
+            border-radius: var(--radius-full);
+            font-size: 0.6875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            display: inline-block;
+        }}
+
+        /* ========== SIDEBAR ========== */
         [data-testid="stSidebar"] {{
             background: {COLORS['bg_sidebar']};
             border-right: 1px solid {COLORS['border']};
-            transition: all 0.3s ease;
         }}
 
         [data-testid="stSidebar"] > div:first-child {{
             padding: 1.5rem 1.25rem;
         }}
 
-        /* Sidebar collapse button styling */
-        [data-testid="stSidebar"] [data-testid="collapsedControl"] {{
-            background: {COLORS['bg_card']};
-            border: 1px solid {COLORS['border']};
-            border-radius: var(--radius-sm);
-            color: {COLORS['text_secondary']};
+        /* Hide Streamlit's default page navigation (we use custom nav with icons) */
+        [data-testid="stSidebarNav"] {{
+            display: none !important;
         }}
 
-        [data-testid="stSidebar"] .stSelectbox label,
-        [data-testid="stSidebar"] .stRadio label {{
-            color: {COLORS['text_secondary']};
-            font-weight: 500;
-            font-size: 0.8125rem;
-        }}
-
-        /* ========== BACK BUTTON ========== */
-        .back-button {{
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.5rem 1rem;
-            background: {COLORS['bg_card']};
-            border: 1px solid {COLORS['border']};
-            border-radius: var(--radius-sm);
-            color: {COLORS['text_secondary']};
-            font-size: 0.875rem;
-            font-weight: 500;
-            text-decoration: none;
-            transition: all var(--transition-fast);
-            cursor: pointer;
-            margin-bottom: 1.5rem;
-        }}
-
-        .back-button:hover {{
-            background: {COLORS['bg_secondary']};
-            color: {COLORS['text_primary']};
-            border-color: {COLORS['accent_primary']};
-        }}
-
-        /* ========== DATA TABLE STYLES ========== */
+        /* ========== DATA TABLE ========== */
         .data-table-container {{
             background: {COLORS['bg_card']};
             border: 1px solid {COLORS['border']};
@@ -439,6 +393,11 @@ def get_custom_css():
             text-transform: uppercase;
             letter-spacing: 0.05em;
             border-bottom: 1px solid {COLORS['border']};
+            cursor: pointer;
+        }}
+
+        .data-table th:hover {{
+            background: {COLORS['border_light']};
         }}
 
         .data-table td {{
@@ -450,10 +409,6 @@ def get_custom_css():
 
         .data-table tr:hover td {{
             background: {COLORS['bg_card_hover']};
-        }}
-
-        .data-table tr:last-child td {{
-            border-bottom: none;
         }}
 
         /* ========== PLAYER ROWS ========== */
@@ -488,7 +443,15 @@ def get_custom_css():
             font-size: 0.6875rem;
             font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 0.02em;
+        }}
+
+        .player-class {{
+            background: {COLORS['bg_secondary']};
+            color: {COLORS['text_secondary']};
+            padding: 0.25rem 0.5rem;
+            border-radius: var(--radius-sm);
+            font-size: 0.6875rem;
+            font-weight: 500;
         }}
 
         .player-value {{
@@ -497,7 +460,7 @@ def get_custom_css():
             font-size: 0.875rem;
         }}
 
-        /* Inflow/Outflow badges */
+        /* Badges */
         .inflow-badge {{
             background: {COLORS['accent_success']}15;
             color: {COLORS['accent_success']};
@@ -506,7 +469,6 @@ def get_custom_css():
             font-size: 0.6875rem;
             font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 0.03em;
         }}
 
         .outflow-badge {{
@@ -517,7 +479,6 @@ def get_custom_css():
             font-size: 0.6875rem;
             font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 0.03em;
         }}
 
         /* ========== SECTION HEADERS ========== */
@@ -531,35 +492,8 @@ def get_custom_css():
             gap: 0.5rem;
         }}
 
-        /* ========== FILTER BAR ========== */
-        .filter-bar {{
-            display: flex;
-            gap: 1rem;
-            padding: 1rem;
-            background: {COLORS['bg_card']};
-            border: 1px solid {COLORS['border']};
-            border-radius: var(--radius-md);
-            margin-bottom: 1.5rem;
-            flex-wrap: wrap;
-            align-items: flex-end;
-        }}
-
-        .filter-item {{
-            flex: 1;
-            min-width: 150px;
-        }}
-
-        .filter-label {{
-            font-size: 0.75rem;
-            font-weight: 500;
-            color: {COLORS['text_muted']};
-            margin-bottom: 0.375rem;
-            text-transform: uppercase;
-            letter-spacing: 0.03em;
-        }}
-
-        /* ========== NEWS ITEMS ========== */
-        .news-item {{
+        /* ========== NEWS FEED ========== */
+        .news-card {{
             background: {COLORS['bg_card']};
             border: 1px solid {COLORS['border']};
             border-radius: var(--radius-md);
@@ -568,9 +502,16 @@ def get_custom_css():
             transition: all var(--transition-fast);
         }}
 
-        .news-item:hover {{
+        .news-card:hover {{
             border-color: {COLORS['accent_info']};
-            box-shadow: {COLORS['shadow_sm']};
+            box-shadow: {COLORS['shadow_md']};
+        }}
+
+        .news-header {{
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.75rem;
         }}
 
         .news-source {{
@@ -579,15 +520,6 @@ def get_custom_css():
             text-transform: uppercase;
             letter-spacing: 0.05em;
             font-weight: 600;
-            margin-bottom: 0.5rem;
-        }}
-
-        .news-title {{
-            font-size: 0.9375rem;
-            font-weight: 600;
-            color: {COLORS['text_primary']};
-            margin-bottom: 0.5rem;
-            line-height: 1.4;
         }}
 
         .news-time {{
@@ -595,16 +527,38 @@ def get_custom_css():
             color: {COLORS['text_muted']};
         }}
 
-        /* ========== CARD CONTAINERS ========== */
-        .card-container {{
-            background: {COLORS['bg_card']};
-            border: 1px solid {COLORS['border']};
-            border-radius: var(--radius-lg);
-            padding: 1.5rem;
-            box-shadow: {COLORS['shadow_sm']};
+        .news-title {{
+            font-size: 1rem;
+            font-weight: 600;
+            color: {COLORS['text_primary']};
+            margin-bottom: 0.5rem;
+            line-height: 1.4;
         }}
 
-        /* ========== METHODOLOGY ========== */
+        .news-summary {{
+            font-size: 0.875rem;
+            color: {COLORS['text_secondary']};
+            line-height: 1.6;
+        }}
+
+        .news-meta {{
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid {COLORS['border_light']};
+        }}
+
+        .news-reporter {{
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+            color: {COLORS['text_muted']};
+        }}
+
+        /* ========== METHODOLOGY CARD ========== */
         .methodology-card {{
             background: {COLORS['bg_card']};
             border: 1px solid {COLORS['border']};
@@ -614,26 +568,70 @@ def get_custom_css():
             box-shadow: {COLORS['shadow_sm']};
         }}
 
-        .formula-box {{
+        .formula-display {{
             background: {COLORS['bg_secondary']};
             border: 1px solid {COLORS['border']};
-            border-left: 3px solid {COLORS['accent_primary']};
-            border-radius: var(--radius-sm);
-            padding: 1.25rem;
-            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            border-radius: var(--radius-md);
+            padding: 1.5rem 2rem;
+            margin: 1.5rem 0;
+            text-align: center;
+        }}
+
+        .formula-display .formula {{
+            font-family: 'Times New Roman', Georgia, serif;
+            font-size: 1.25rem;
+            font-style: italic;
             color: {COLORS['text_primary']};
-            font-size: 0.875rem;
+            line-height: 2;
+        }}
+
+        .formula-display .formula-part {{
+            display: block;
+            margin: 0.5rem 0;
+        }}
+
+        .position-table {{
+            width: 100%;
+            border-collapse: collapse;
             margin: 1rem 0;
         }}
 
-        /* ========== MISC ========== */
-        .stDataFrame {{
-            background: {COLORS['bg_card']};
-            border-radius: var(--radius-md);
-            overflow: hidden;
-            border: 1px solid {COLORS['border']};
+        .position-table th {{
+            background: {COLORS['bg_secondary']};
+            padding: 0.875rem 1rem;
+            text-align: left;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: {COLORS['text_muted']};
+            text-transform: uppercase;
+            border-bottom: 2px solid {COLORS['border']};
         }}
 
+        .position-table td {{
+            padding: 1rem;
+            border-bottom: 1px solid {COLORS['border_light']};
+            vertical-align: top;
+        }}
+
+        .position-table td:first-child {{
+            font-weight: 600;
+            color: {COLORS['accent_primary']};
+            width: 80px;
+        }}
+
+        .position-table td:nth-child(2) {{
+            font-weight: 700;
+            color: {COLORS['text_primary']};
+            width: 100px;
+        }}
+
+        .position-table td:last-child {{
+            color: {COLORS['text_secondary']};
+            font-size: 0.875rem;
+            line-height: 1.6;
+        }}
+
+        /* ========== MISC ========== */
         .stButton > button {{
             background: {COLORS['accent_primary']};
             color: white;
@@ -711,10 +709,6 @@ def get_custom_css():
             border-radius: 3px;
         }}
 
-        ::-webkit-scrollbar-thumb:hover {{
-            background: {COLORS['text_muted']};
-        }}
-
         .stSelectbox > div > div {{
             background: {COLORS['bg_card']};
             border-color: {COLORS['border']};
@@ -740,90 +734,45 @@ def get_custom_css():
             opacity: 0.5;
         }}
 
-        /* Loading spinner */
+        /* Sample data banner */
+        .sample-data-banner {{
+            background: {COLORS['accent_warning']}15;
+            border: 1px solid {COLORS['accent_warning']}30;
+            border-radius: var(--radius-sm);
+            padding: 0.75rem 1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8125rem;
+            color: {COLORS['accent_warning']};
+        }}
+
+        /* Loading state */
         .loading-spinner {{
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 3rem;
         }}
-
-        /* Pagination */
-        .pagination {{
-            display: flex;
-            justify-content: center;
-            gap: 0.5rem;
-            margin-top: 1.5rem;
-        }}
-
-        .pagination-btn {{
-            padding: 0.5rem 1rem;
-            background: {COLORS['bg_card']};
-            border: 1px solid {COLORS['border']};
-            border-radius: var(--radius-sm);
-            color: {COLORS['text_secondary']};
-            font-size: 0.875rem;
-            cursor: pointer;
-            transition: all var(--transition-fast);
-        }}
-
-        .pagination-btn:hover {{
-            background: {COLORS['bg_secondary']};
-            border-color: {COLORS['accent_primary']};
-        }}
-
-        .pagination-btn.active {{
-            background: {COLORS['accent_primary']};
-            color: white;
-            border-color: {COLORS['accent_primary']};
-        }}
     </style>
     """
 
 
-def render_top_nav(active_page="home"):
-    """Render the top navigation bar."""
-    nav_items = [
-        {"id": "home", "label": "Home", "url": "/"},
-        {"id": "database", "label": "Database", "url": "/Database"},
-        {"id": "teams", "label": "Teams", "url": "/Team_Details"},
-        {"id": "about", "label": "About", "url": "/About"},
-    ]
-
-    links_html = ""
-    for item in nav_items:
-        active_class = "active" if item["id"] == active_page else ""
-        links_html += f'<a href="{item["url"]}" class="top-nav-link {active_class}">{item["label"]}</a>'
-
+def render_brand_header():
+    """Render the NIL or Nothing brand header."""
     return f"""
-    <div class="top-nav">
-        <div class="top-nav-brand">
-            <span>🏈</span>
-            <span>Transfer Portal</span>
-        </div>
-        <div class="top-nav-links">
-            {links_html}
+    <div class="brand-header">
+        <div>
+            <div class="brand-logo">NIL <span class="accent">or</span> Nothing</div>
+            <div class="brand-tagline">Transfer Portal Analytics • 2026 Offseason</div>
         </div>
     </div>
-    <div class="nav-spacer"></div>
-    """
-
-
-def render_metric_card_clickable(value, label, variant="default", link="/Database"):
-    """Render a clickable styled metric card."""
-    variant_class = f" {variant}" if variant != "default" else ""
-    return f"""
-    <a href="{link}" class="metric-card-link">
-        <div class="metric-card{variant_class}">
-            <p class="metric-value">{value}</p>
-            <p class="metric-label">{label}</p>
-        </div>
-    </a>
     """
 
 
 def render_metric_card(value, label, variant="default", icon=""):
-    """Render a styled metric card with optional variant for border color."""
+    """Render a styled metric card."""
     variant_class = f" {variant}" if variant != "default" else ""
     return f"""
     <div class="metric-card{variant_class}">
@@ -833,64 +782,31 @@ def render_metric_card(value, label, variant="default", icon=""):
     """
 
 
-def render_team_card_clickable(rank, team, conference, value, net_value, logo_url=""):
-    """Render a clickable styled team card with logo."""
-    net_class = "positive" if net_value >= 0 else "negative"
-    net_prefix = "+" if net_value >= 0 else ""
-    logo_html = f'<img src="{logo_url}" class="team-logo" alt="{team}" />' if logo_url else ""
-    team_url = team.replace(" ", "_")
+def render_team_row(rank, team, logo_url, score, nil_spent, off_players, def_players, conference):
+    """Render a team row for the rankings table."""
+    score_class = "score-positive" if score >= 0 else "score-negative"
+    score_prefix = "+" if score >= 0 else ""
 
     return f"""
-    <a href="/Team_Details?team={team_url}" class="team-card-link">
-        <div class="team-card">
-            <span class="team-rank">{rank}</span>
-            {logo_html}
-            <div class="team-info">
-                <div class="team-name">{team}</div>
-                <div class="team-conference">{conference}</div>
+    <tr>
+        <td style="font-weight: 600; color: {COLORS['text_muted']};">{rank}</td>
+        <td>
+            <div class="team-cell">
+                <img src="{logo_url}" class="team-logo" alt="{team}" />
+                <span class="team-name">{team}</span>
             </div>
-            <div class="team-stats">
-                <div class="team-value">${value:.1f}M</div>
-                <div class="team-net {net_class}">{net_prefix}${net_value:.1f}M</div>
-            </div>
-        </div>
-    </a>
+        </td>
+        <td class="score-cell {score_class}">{score_prefix}{score:.1f}</td>
+        <td class="nil-cell">${nil_spent:.1f}M</td>
+        <td class="players-cell">{off_players}</td>
+        <td class="players-cell">{def_players}</td>
+        <td><span class="conf-cell">{conference}</span></td>
+    </tr>
     """
 
 
-def render_team_card(rank, team, conference, value, net_value, logo_url=""):
-    """Render a styled team card with logo (non-clickable version)."""
-    net_class = "positive" if net_value >= 0 else "negative"
-    net_prefix = "+" if net_value >= 0 else ""
-    logo_html = f'<img src="{logo_url}" class="team-logo" alt="{team}" />' if logo_url else ""
-
-    return f"""
-    <div class="team-card">
-        <span class="team-rank">{rank}</span>
-        {logo_html}
-        <div class="team-info">
-            <div class="team-name">{team}</div>
-            <div class="team-conference">{conference}</div>
-        </div>
-        <div class="team-stats">
-            <div class="team-value">${value:.1f}M</div>
-            <div class="team-net {net_class}">{net_prefix}${net_value:.1f}M</div>
-        </div>
-    </div>
-    """
-
-
-def render_back_button(url="/", label="Back to Dashboard"):
-    """Render a back button."""
-    return f"""
-    <a href="{url}" class="back-button">
-        ← {label}
-    </a>
-    """
-
-
-def render_player_row(name, position, school, value, flow_type="inflow"):
-    """Render a styled player row."""
+def render_player_row(name, position, player_class, school, value, score, flow_type="inflow"):
+    """Render a styled player row with class field."""
     badge_class = "inflow-badge" if flow_type == "inflow" else "outflow-badge"
     badge_text = "IN" if flow_type == "inflow" else "OUT"
     return f"""
@@ -898,18 +814,47 @@ def render_player_row(name, position, school, value, flow_type="inflow"):
         <span class="{badge_class}">{badge_text}</span>
         <span class="player-name">{name}</span>
         <span class="player-position">{position}</span>
+        <span class="player-class">{player_class}</span>
         <span style="color: {COLORS['text_muted']}; font-size: 0.8125rem;">{school}</span>
         <span class="player-value">${value:.2f}M</span>
     </div>
     """
 
 
-def render_news_item(source, title, time_ago, url="#"):
-    """Render a styled news item."""
+def render_news_card(title, summary, source, reporter, time_ago, category):
+    """Render a news card for the live feed."""
+    category_colors = {
+        "commitment": COLORS["accent_success"],
+        "entry": COLORS["accent_warning"],
+        "visit": COLORS["accent_info"],
+        "rumor": COLORS["accent_secondary"],
+    }
+    cat_color = category_colors.get(category.lower(), COLORS["text_muted"])
+
     return f"""
-    <div class="news-item">
-        <div class="news-source">{source}</div>
-        <div class="news-title">{title}</div>
-        <div class="news-time">{time_ago}</div>
+    <div class="news-card">
+        <div class="news-header">
+            <span class="news-source" style="color: {cat_color};">{category.upper()}</span>
+            <span class="news-time">{time_ago}</span>
+        </div>
+        <h3 class="news-title">{title}</h3>
+        <p class="news-summary">{summary}</p>
+        <div class="news-meta">
+            <span class="news-reporter">📰 {reporter} • {source}</span>
+        </div>
     </div>
     """
+
+
+def render_sample_data_banner():
+    """Render a banner indicating sample data is being used."""
+    return f"""
+    <div class="sample-data-banner">
+        ⚠️ <strong>Sample Data:</strong> This dashboard displays simulated data for demonstration. Real-time data would require API integration with 247Sports, On3, or ESPN.
+    </div>
+    """
+
+
+def get_team_logo(team_name: str) -> str:
+    """Get the logo URL for a team."""
+    return TEAM_LOGOS.get(team_name, "")
