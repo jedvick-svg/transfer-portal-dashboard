@@ -853,8 +853,3 @@ def render_sample_data_banner():
         ⚠️ <strong>Sample Data:</strong> This dashboard displays simulated data for demonstration. Real-time data would require API integration with 247Sports, On3, or ESPN.
     </div>
     """
-
-
-def get_team_logo(team_name: str) -> str:
-    """Get the logo URL for a team."""
-    return TEAM_LOGOS.get(team_name, "")
